@@ -14,6 +14,7 @@ import SignIn from './pages/SignIn'
 import SignUp from './pages/SignUp'
 import CreateListing from './pages/CreateListing'
 import Listing from './pages/Listing'
+import Contact from './pages/Contact'
 
 const App = () => {
   return (
@@ -41,6 +42,9 @@ const App = () => {
               path="/category/:categoryName/:listingId"
               element={<Listing />}
             />
+          </Route>
+          <Route path="/contact/:landlordId" element={<PrivateRoute />}>
+            <Route path="/contact/:landlordId" element={<Contact />} />
           </Route>
 
           {/* Auth */}
