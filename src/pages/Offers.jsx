@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import {
   collection,
@@ -16,8 +15,6 @@ import Spinner from '../components/Spinner'
 import ListingItem from '../components/ListingItem'
 
 const Offers = () => {
-  const { categoryName } = useParams()
-
   const [listings, setListings] = useState(null)
   const [loading, setLoading] = useState(true)
   const [lastFetchedListing, setLastFetchedListing] = useState(null)
