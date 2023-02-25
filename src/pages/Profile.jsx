@@ -1,12 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getAuth, updateProfile } from 'firebase/auth'
-import { updateDoc, doc } from 'firebase/firestore'
+import {
+  updateDoc,
+  doc,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  deleteDoc,
+} from 'firebase/firestore'
 
 import { db } from '../firebase.config'
 import arrowRight from '../assets/svg/keyboardArrowRightIcon.svg'
 import homeIcon from '../assets/svg/homeIcon.svg'
+import Spinner from '../components/Spinner'
+import ListingItem from '../components/ListingItem'
 
 const Profile = () => {
   const auth = getAuth()
@@ -17,8 +28,36 @@ const Profile = () => {
     name: auth.currentUser.displayName,
     email: auth.currentUser.email,
   })
+  const [listings, setListings] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const { name, email } = formData
+
+  useEffect(() => {
+    const fetchUserListings = async () => {
+      const listingsRef = collection(db, 'listings')
+      const q = query(
+        listingsRef,
+        where('userRef', '==', auth.currentUser.uid),
+        orderBy('timestamp', 'desc')
+      )
+      const querySnap = await getDocs(q)
+
+      let lists = []
+
+      querySnap.forEach((doc) => {
+        return lists.push({
+          id: doc.id,
+          data: doc.data(),
+        })
+      })
+
+      setListings(lists)
+      setLoading(false)
+    }
+
+    fetchUserListings()
+  }, [auth.currentUser.uid])
 
   const onLogout = () => {
     auth.signOut()
@@ -30,6 +69,17 @@ const Profile = () => {
       ...prevState,
       [e.target.id]: e.target.value,
     }))
+  }
+
+  const onDelete = async (listingId) => {
+    if (window.confirm('Are you sure want to delete?')) {
+      await deleteDoc(doc(db, 'listings', listingId))
+      const updatedListings = listings.filter(
+        (listing) => listing.id !== listingId
+      )
+      setListings(updatedListings)
+      toast.success('Successfully deleted')
+    }
   }
 
   const onSubmit = async () => {
@@ -47,6 +97,10 @@ const Profile = () => {
     } catch (error) {
       toast.error('Could not update profile details')
     }
+  }
+
+  if (loading) {
+    return <Spinner />
   }
 
   return (
@@ -99,6 +153,22 @@ const Profile = () => {
           <p>Sale or Ren</p>
           <img src={arrowRight} alt="arrow right" />
         </Link>
+
+        {listings && (
+          <>
+            <p className="listingText">Your Listings</p>
+            <ul className="listingsList">
+              {listings.map((listing) => (
+                <ListingItem
+                  key={listing.id}
+                  listing={listing.data}
+                  id={listing.id}
+                  onDelete={() => onDelete(listing.id)}
+                />
+              ))}
+            </ul>
+          </>
+        )}
       </main>
     </div>
   )
