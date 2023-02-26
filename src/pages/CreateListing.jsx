@@ -19,7 +19,7 @@ const CreateListing = () => {
   const navigate = useNavigate()
   const isMounted = useRef(true)
 
-  const [geolocationEnabled, setGeolocationEnabled] = useState(false)
+  const [geolocationEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     type: 'rent',
