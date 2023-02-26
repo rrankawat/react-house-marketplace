@@ -72,7 +72,12 @@ const EditListing = () => {
 
       if (docSnap.exists()) {
         setListing(docSnap.data())
-        setFormData({ ...docSnap.data(), address: docSnap.data().location })
+        setFormData({
+          ...docSnap.data(),
+          address: docSnap.data().location,
+          latitude: docSnap.data().geolocation.lat,
+          longitude: docSnap.data().geolocation.lng,
+        })
         setLoading(false)
       } else {
         navigate('/')
